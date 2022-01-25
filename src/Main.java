@@ -26,7 +26,7 @@ public class Main {
         User user = userRepo.get(id);
 
         if (user == null) {
-            System.out.println("User with id " + id + " was not found!");
+            System.out.println("User with id " + id + " was not found.");
         } else {
             System.out.println(user);
         }
