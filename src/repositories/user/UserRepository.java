@@ -59,4 +59,42 @@ public class UserRepository implements EntityRepository<User> {
 
         return users;
     }
+
+    @Override
+    public boolean create(User user) {
+        try {
+            Connection conn = db.getConnection();
+            Statement stmt = conn.createStatement();
+            stmt.execute(
+                    "INSERT INTO users(name, surname) VALUES('" + user.getName() +
+                            "','" + user.getSurname() + "')");
+
+            return true;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return false;
+    }
+
+    @Override
+    public User delete(int id) {
+        User user = get(id);
+
+        if (user == null)
+            return null;
+
+        try {
+            Connection conn = db.getConnection();
+            Statement stmt = conn.createStatement();
+            stmt.execute(
+                    "DELETE FROM users WHERE id = " + id);
+
+            return user;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return null;
+    }
 }
