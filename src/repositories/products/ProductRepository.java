@@ -2,9 +2,9 @@ package repositories.products;
 
 import db.DB;
 import models.Product;
-import models.User;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProductRepository implements IProductRepository {
@@ -25,10 +25,10 @@ public class ProductRepository implements IProductRepository {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                product = new Product(rs.getInt("id"),
-                        rs.getString("name"),
-                        rs.getString("category"),
-                        rs.getDouble("price"));
+                product = Product.builder(rs.getString("name"))
+                        .withId(rs.getInt("id"))
+                        .withCategory(rs.getString("category"))
+                        .withPrice(rs.getDouble("price")).build();
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -39,21 +39,90 @@ public class ProductRepository implements IProductRepository {
 
     @Override
     public List<Product> getAll() {
-        return null;
+        List<Product> products = new ArrayList<>();
+
+        try {
+            Connection conn = db.getConnection();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM products");
+
+            while (rs.next()) {
+                Product product = Product.builder(rs.getString("name"))
+                        .withId(rs.getInt("id"))
+                        .withCategory(rs.getString("category"))
+                        .withPrice(rs.getDouble("price")).build();
+
+                products.add(product);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return products;
     }
 
     @Override
     public boolean create(Product product) {
+        try {
+            Connection conn = db.getConnection();
+            String sql = "INSERT INTO products(name, category, price) VALUES(?,?,?)";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, product.getName());
+            stmt.setString(2, product.getCategory());
+            stmt.setDouble(3, product.getPrice());
+            stmt.execute();
+
+            return true;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
         return false;
     }
 
     @Override
     public Product delete(int id) {
+        Product product = get(id);
+
+        if (product == null)
+            return null;
+
+        try {
+            Connection conn = db.getConnection();
+            Statement stmt = conn.createStatement();
+            stmt.execute(
+                    "DELETE FROM products WHERE id = " + id);
+
+            return product;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
         return null;
     }
 
     @Override
     public List<Product> getAllByCategory(String category) {
-        return null;
+        List<Product> products = new ArrayList<>();
+
+        try {
+            Connection conn = db.getConnection();
+            PreparedStatement stmt = conn.prepareStatement("SELECT * FROM products WHERE category=?");
+            stmt.setString(1, category);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Product product = Product.builder(rs.getString("name"))
+                        .withId(rs.getInt("id"))
+                        .withCategory(rs.getString("category"))
+                        .withPrice(rs.getDouble("price")).build();
+
+                products.add(product);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return products;
     }
 }

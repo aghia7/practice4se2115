@@ -1,8 +1,11 @@
+import controllers.ProductController;
 import controllers.UserController;
 import db.DB;
 import db.postgres.Postgres;
 import models.User;
 import repositories.EntityRepository;
+import repositories.products.IProductRepository;
+import repositories.products.ProductRepository;
 import repositories.users.IUserRepository;
 import repositories.users.UserRepository;
 
@@ -12,10 +15,12 @@ public class Main {
     private static Scanner sc = new Scanner(System.in);
 
     public static void main(String[] args) {
-        DB db = new Postgres();
+        DB db = Postgres.getInstance();
         IUserRepository userRepo = new UserRepository(db);
+        IProductRepository productRepo = new ProductRepository(db);
         UserController userCtrl = new UserController(userRepo);
-        MyApplication app = new MyApplication(userCtrl);
+        ProductController productCtrl = new ProductController(productRepo);
+        MyApplication app = new MyApplication(userCtrl, productCtrl);
 
         app.start();
 

@@ -23,6 +23,10 @@ public class UserController {
 
     public String getAll() {
         List<User> users = userRepo.getAll();
+
+        if (users.isEmpty())
+            return "User`s list is empty";
+
         String resp = "";
         for (User user : users)
             resp += user + "\n";
